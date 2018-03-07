@@ -6,9 +6,6 @@ from django.utils.functional import lazy
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
 from django.contrib.contenttypes.models import ContentType
-from django.urls import (RegexURLResolver, RegexURLPattern,
-                                      Resolver404, get_resolver)
-
 
 class NotSet(object):
     """A singleton to identify unset values (where None would have meaning)."""
@@ -30,46 +27,10 @@ class Literal(object):
         self.value = value
 
 
-def _pattern_resolve_to_name(pattern, path):
-    match = pattern.regex.search(path)
-    if match:
-        name = ""
-        if pattern.name:
-            name = pattern.name
-        elif hasattr(pattern, '_callback_str'):
-            name = pattern._callback_str
-        else:
-            name = "%s.%s" % (pattern.callback.__module__,
-                              pattern.callback.__name__)
-        return name
-
-
-def _resolver_resolve_to_name(resolver, path):
-    tried = []
-    match = resolver.regex.search(path)
-    if match:
-        new_path = path[match.end():]
-        for pattern in resolver.url_patterns:
-            try:
-                if isinstance(pattern, RegexURLPattern):
-                    name = _pattern_resolve_to_name(pattern, new_path)
-                elif isinstance(pattern, RegexURLResolver):
-                    name = _resolver_resolve_to_name(pattern, new_path)
-            except Resolver404 as e:
-                tried.extend([(pattern.regex.pattern + '   ' + t) for t in
-                              e.args[0]['tried']])
-            else:
-                if name:
-                    return name
-                tried.append(pattern.regex.pattern)
-        raise Resolver404({'tried': tried, 'path': new_path})
 
 
 def resolve_to_name(path, urlconf=None):
-    try:
-        return _resolver_resolve_to_name(get_resolver(urlconf), path)
-    except Resolver404:
-        return None
+   pass
 
 
 def _replace_quot(match):
